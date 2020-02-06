@@ -1,0 +1,14 @@
+{
+	"liveServer.settings.https": {
+		"enable": true,
+		"cert": "/home/plumps/code/threejs-app-learn/https/cert.pem",
+		"key": "/home/plumps/code/threejs-app-learn/https/key.pem",
+		"passphrase": ""
+	},
+	"files.watcherExclude": {
+		"**/.git/objects/**": true,
+		"**/.git/subtree-cache/**": true,
+		"**/node_modules/*/**": true
+	},
+	"liveServer.settings.multiRootWorkspaceName": "threejs-app-learn"
+}
