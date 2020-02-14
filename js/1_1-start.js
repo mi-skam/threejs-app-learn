@@ -25,7 +25,7 @@ const geometry = new THREE.BoxBufferGeometry(2, 2, 2);
 
 
 // create a default (white) Basic material
-const material = new THREE.MeshBasicMaterial();
+const material = new THREE.MeshBasicMaterial({color: "grey"});
 
 // create a Mesh containing the geometry and material
 const mesh = new THREE.Mesh(geometry, material);
