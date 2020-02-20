@@ -1,23 +1,22 @@
-// these need to be accessed inside more than one function so we'll declare them first
 let container;
 let camera;
 let controls;
 let renderer;
 let scene;
-let mesh;
+
+const mixers = [];
+const clock = new THREE.Clock();
 
 function init() {
-  // Get a reference to the container element that will hold our scene
   container = document.querySelector("#scene-container");
 
-  // create a Scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x8fbcd4);
 
   createCamera();
   createControls();
   createLights();
-  createMeshes();
+  loadModels();
   createRenderer();
 
   // start the animation loop
@@ -27,16 +26,15 @@ function init() {
   });
 }
 function createCamera() {
-  // set up the options for a perspective camera
-  const fov = 35; // fov = Field Of View
+  const fov = 35;
   const aspect = container.clientWidth / container.clientHeight;
 
-  const near = 5;
+  const near = 1;
   const far = 100;
 
   camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
-  camera.position.set(-4, 4, 10);
+  camera.position.set(-1.5, 3, 100);
 }
 
 function createControls() {
@@ -56,29 +54,6 @@ function createLights() {
   scene.add(ambientLight, directLight);
 }
 
-function createMeshes() {
-  // create a geometry
-  const geometry = new THREE.BoxBufferGeometry(2, 2, 2);
-
-  // create a texture loader
-  const textureLoader = new THREE.TextureLoader();
-  // load a texture
-  const texture = textureLoader.load("../textures/uv_test_bw.png");
-  texture.encoding = THREE.sRGBEncoding;
-  texture.anisotropy = 16;
-
-  // create a default (white) Basic material
-  const material = new THREE.MeshStandardMaterial({
-    map: texture
-  });
-
-  // create a Mesh containing the geometry and material
-  mesh = new THREE.Mesh(geometry, material);
-
-  // add the mesh to the scene object
-  scene.add(mesh);
-}
-
 function createRenderer() {
   // create a WebGLRenderer and set its width and height
   renderer = new THREE.WebGLRenderer({
@@ -96,7 +71,60 @@ function createRenderer() {
   container.appendChild(renderer.domElement);
 }
 
-function update() {}
+function loadModels() {
+  const loader = new THREE.GLTFLoader();
+
+  const onLoad = (gltf, position) => {
+    const model = gltf.scene.children[0];
+    model.position.copy(position);
+
+    const animation = gltf.animations[0];
+
+    const mixer = new THREE.AnimationMixer(model);
+    mixers.push(mixer);
+
+    const action = mixer.clipAction(animation);
+    action.play();
+
+    scene.add(model);
+  };
+
+  const onProgress = () => {};
+
+  const onError = errorMessage => {
+    console.log(errorMessage);
+  };
+
+  const parrotPosition = new THREE.Vector3(0, 0, 2.5);
+  loader.load(
+    "models/Parrot.glb",
+    gltf => onLoad(gltf, parrotPosition),
+    onProgress,
+    onError
+  );
+
+  const flamingoPosition = new THREE.Vector3(7.5, 0, -10);
+  loader.load(
+    "models/Flamingo.glb",
+    gltf => onLoad(gltf, flamingoPosition),
+    onProgress,
+    onError
+  );
+
+  const storkPosition = new THREE.Vector3(0, -2.5, -10);
+  loader.load(
+    "models/Stork.glb",
+    gltf => onLoad(gltf, storkPosition),
+    onProgress,
+    onError
+  );
+}
+function update() {
+  const delta = clock.getDelta();
+  for (const mixer of mixers) {
+    mixer.update(delta);
+  }
+}
 
 function render() {
   renderer.render(scene, camera);
@@ -104,7 +132,7 @@ function render() {
 
 function onWindowResize() {
   camera.aspect = container.clientWidth / container.clientHeight;
-  // update the camera's frustum
+  // update frustum
   camera.updateProjectionMatrix();
   // renderer and canvas!
   renderer.setSize(container.clientWidth, container.clientHeight);
@@ -112,5 +140,4 @@ function onWindowResize() {
 
 window.addEventListener("resize", onWindowResize);
 
-// call the init function to set everything up
 init();
