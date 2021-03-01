@@ -24,6 +24,6 @@
   "dependencies": {},
   "devDependencies": {
     "parcel": "^1.12.4",
-    "three": "^0.113.2"
+    "three": "^0.125.0"
   }
 }
